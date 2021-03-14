@@ -1,11 +1,11 @@
 #!/bin/bash
 
 start_fn(){
-        echo Task$2 is going | tee -a starting_task.log
+        echo Task $1 is going | tee -a starting_task.log
 }
 
 finish_fn(){
-        echo Task$3 is done | tee -a starting_task.log
+        echo Task $1 is done | tee -a starting_task.log
 }
 
 check_folder(){
