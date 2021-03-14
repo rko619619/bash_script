@@ -1,4 +1,4 @@
-!#/bin/bash
+#!/bin/bash
 #echo 'Task1 is going'
 
 #sed -i 's/ONBOOT=no/ONBOOT=yes/' /etc/sysconfig/network-scripts/ifcfg-enp0s3
@@ -8,94 +8,95 @@
 
 
 
-echo 'Task2 is going '
+echo 'Task2 is going '| tee -a text.txt
 
 for var in INPUT OUTPUT
 do
-iptables -A $var -p tcp --dport 22 -j ACCEPT; echo Command for added iptables $var is done with status code $?
+iptables -A $var -p tcp --dport 22 -j ACCEPT; echo Command for added iptables $var is done with status code $?| tee -a text.txt
 done
 
 sed -i 's/#PermitRootLogin yes/PermitRootlogin no/' /etc/ssh/sshd_config; echo Added a permit root login is done with status code $?
-systemctl restart sshd; echo Restart sshd is done with status code $?
+systemctl restart sshd; echo Restart sshd is done with status code $?| tee -a text.txt
 
-echo 'Task2 is done'
-
-
-
-echo 'Task3 is going'
-
-echo -n "Enter a mountpoint for ISO "
-read path
-mkdir -p /$path
-
-mount /CentOS-7-x86_64-DVD-2009.iso /$path; echo Mount for ISO is done with status code $?
-
-yum --desablerepo=\* version &> /dev/null
+echo 'Task2 is done'| tee -a text.txt
 
 
-echo  '[LocalRepo]' >  /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?
-echo  'name=LocalRepository' >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?
-echo  'baseurl=file:///'$path >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?
-echo  'enabled=1' >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?
-echo  'gpgcheck=0' >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?
-echo  'gpgkey=file::///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7' >>  /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?
 
-echo 'Task3 is done'
-echo 'Task4 is going'
+echo 'Task3 is going'|tee -a text.txt
 
-echo 'Start state of disks' && lsblk
+echo -n "Enter a mountpoint for ISO "|tee -a text.txt
+read path | tee -a text.txt
+mkdir -p /$path | tee -a text.txt
 
-echo 'Task4 is done'
+mount /CentOS-7-x86_64-DVD-2009.iso /$path; echo Mount for ISO is done with status code $? |tee -a text.txt
+
+yum --desablerepo=\* version &> /dev/null | tee -a text.txt
 
 
-echo 'Task5 is going'
+echo  '[LocalRepo]' >  /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $? | tee -a text.txt
+echo  'name=LocalRepository' >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $? | tee -a text.txt
+echo  'baseurl=file:///'$path >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a text.txt
+echo  'enabled=1' >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a text.txt
+echo  'gpgcheck=0' >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a text.txt
+echo  'gpgkey=file::///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7' >>  /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a text.txt
 
-pvcreate /dev/md5 && vgcreate vlgrp1 /dev/md5 && lvcreate -l +100%FREE -n lv  vlgrp1; echo Creating a LVM is done with status code $?
+echo 'Task3 is done'| tee -a text.txt
+echo 'Task4 is going'| tee -a text.txt
 
-echo 'Task5 is done'
+echo 'Start state of disks' && lsblk| tee -a text.txt
 
-
-echo 'Task6 is going'
-
-mkfs -t xfs /dev/vlgrp1/lv; echo Creating a xfs is done with status code $?
-
-echo 'Task6 is done'
-
-
-echo 'Task7 is going'
-
-echo -n "Enter a mountpoint for volume "
-read path_volume
-mkdir -p /$path_volume
-
-mount /dev/vlgrp1/lv /$path_volume; echo Mount volume is done with status code $?
-
-echo 'Task7 is done'
+echo 'Task4 is done'| tee -a text.txt
 
 
-echo 'Task8 is going'
-yum install nfs-utils
+echo 'Task5 is going'| tee -a text.txt
 
-systemctl start rpcbind
-systemctl enable rpcbind
-systemctl start nfs-server
-systemctl enable nfs-server
-systemctl start rpc-statd
-systemctl start nfs-idmapd
+pvcreate /dev/md5 && vgcreate vlgrp1 /dev/md5 && lvcreate -l +100%FREE -n lv  vlgrp1; echo Creating a LVM is done with status code $?| tee -a text.txt
 
-echo -n "Enter a dir for nfs "
-read path_nfs
-mkdir -p /$path_nfs
+echo 'Task5 is done'| tee -a text.txt
 
-echo -n "Enter a mountpoint for nfs "
-read path_mpnfs
-mkdir -p /$path_mpnfs
 
-chmod 777 /$path_nfs
+echo 'Task6 is going'| tee -a text.txt
 
-echo /$path_nfs' *(rw,sync,no_root_squash)' >> /etc/exports
-exportfs -r
+mkfs -t xfs /dev/vlgrp1/lv; echo Creating a xfs is done with status code $?| tee -a text.txt
 
-mount -t nfs 192.168.57.5:/$path_nfs /$path_mpnfs; echo Mount nfs is done with status code $?
+echo 'Task6 is done'| tee -a text.txt
 
-echo 'Task8 is done'
+
+echo 'Task7 is going'| tee -a text.txt
+
+echo -n "Enter a mountpoint for volume "| tee -a text.txt
+read path_volume| tee -a text.txt
+mkdir -p /$path_volume| tee -a text.txt
+
+mount /dev/vlgrp1/lv /$path_volume; echo Mount volume is done with status code $?| tee -a text.txt
+
+echo 'Task7 is done'| tee -a text.txt
+
+
+echo 'Task8 is going'|tee -a text.txt
+yum install nfs-utils| tee -a text.txt
+
+systemctl start rpcbind|tee -a text.txt
+systemctl enable rpcbind|tee -a text.txt
+systemctl start nfs-server|tee -a text.txt
+systemctl enable nfs-server|tee -a text.txt
+systemctl start rpc-statd|tee -a text.txt
+systemctl start nfs-idmapd| tee -a text.txt
+
+echo -n "Enter a dir for nfs "| tee -a text.txt
+read path_nfs|tee -a text.txt
+mkdir -p /$path_nfs|tee -a text.txt
+
+echo -n "Enter a mountpoint for nfs "| tee -a text.txt
+read path_mpnfs|tee -a text.txt
+mkdir -p /$path_mpnfs|tee -a text.txt
+
+chmod 777 /$path_nfs; echo Chmod is done with status code $?| tee -a text.txt
+
+echo /$path_nfs' *(rw,sync,no_root_squash)' >> /etc/exports; echo Write data to /$path_nfs is done with satatus code $?| tee -a text.txt
+
+exportfs -r; echo Exportfs is done with status code $?| tee -a text.txt
+
+mount -t nfs 192.168.57.5:/$path_nfs /$path_mpnfs; echo Mount nfs is done with status code $?| tee -a text.txt
+
+echo 'Task8 is done'| tee -a text.txt
