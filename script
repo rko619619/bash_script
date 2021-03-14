@@ -1,5 +1,5 @@
-!#/bin/bash
-#echo 'Task1 is going'
+#!/bin/bash
+#echo'Task1 is going'
 
 #sed -i 's/ONBOOT=no/ONBOOT=yes/' /etc/sysconfig/network-scripts/ifcfg-enp0s3
 #service network restart
@@ -27,14 +27,15 @@ echo 'Task3 is going'| tee -a text.txt
 while true; do
         echo -n "Enter a mountpoint for ISO "| tee -a text.txt
         read path; echo Read is done with satatus code $?| tee -a text.txt
-        if [ -d /$path]
+        if [ -d /$path ]
                 then
                 echo 'This folder is exists. You must to repeat.'
                 continue
         else
                 mkdir  /$path; echo Create a dir /$path is done with status code $?| tee -a text.txt
+	    mount /CentOS-7-x86_64-DVD-2009.iso /$path; echo Mount for ISO is done with status code $?| tee -a text.txt
                 break
-                mount /CentOS-7-x86_64-DVD-2009.iso /$path; echo Mount for ISO is done with status code $?| tee -a text.txt
+                
         fi
 done
 
@@ -114,7 +115,7 @@ systemctl start nfs-idmapd; echo NFS-IDMAPD is done with status code $?| tee -a 
 while true; do
         echo -n "Enter a dir for nfs "| tee -a text.txt
         read path_nfs; echo Read is done with status code $?| tee -a text.txt
-        if [ -d /$path_nfs]
+        if [ -d /$path_nfs ]
                 then
                 echo 'This folder is exists. You must to repeat.'
                 continue
@@ -127,7 +128,7 @@ done
 while true; do
         echo -n "Enter a mountpoint for nfs "| tee -a text.txt
         read path_mpnfs; echo Read is done with status code $?| tee -a text.txt
-        if [ -d /$path_mpnfs]
+        if [ -d /$path_mpnfs ]
                 then
                 echo 'This folder is exists. You must to repeat.'
                 continue
@@ -138,7 +139,6 @@ while true; do
 done
 
 chmod 777 /$path_nfs; echo Chmode is done with status code $?| tee -a text.txt
-
 echo /$path_nfs' *(rw,sync,no_root_squash)' >> /etc/exports;echo Write a data is done with status code $?| tee -a text.txt
 exportfs -r; echo Exportfs is done with status code $?| tee -a text.txt
 
