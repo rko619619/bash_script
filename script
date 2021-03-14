@@ -24,11 +24,19 @@ echo 'Task2 is done'| tee -a text.txt
 
 echo 'Task3 is going'| tee -a text.txt
 
-echo -n "Enter a mountpoint for ISO "| tee -a text.txt
-read path; echo Read is done with satatus code $?| tee -a text.txt
-mkdir -p /$path; echo Create a dir /$path is done with status code $?| tee -a text.txt
-
-mount /CentOS-7-x86_64-DVD-2009.iso /$path; echo Mount for ISO is done with status code $?| tee -a text.txt
+while true; do
+        echo -n "Enter a mountpoint for ISO "| tee -a text.txt
+        read path; echo Read is done with satatus code $?| tee -a text.txt
+        if [ -d /$path]
+                then
+                echo 'This folder is exists. You must to repeat.'
+                continue
+        else
+                mkdir  /$path; echo Create a dir /$path is done with status code $?| tee -a text.txt
+                break
+                mount /CentOS-7-x86_64-DVD-2009.iso /$path; echo Mount for ISO is done with status code $?| tee -a text.txt
+        fi
+done
 
 yum --desablerepo=\* version &> /dev/null; echo Disabled a repo is done with status code %?| tee -a text.txt
 
@@ -76,11 +84,19 @@ echo 'Task6 is done'| tee -a text.txt
 
 echo 'Task7 is going'| tee -a text.txt
 
-echo -n "Enter a mountpoint for volume "| tee -a text.txt
-read path_volume; echo Read a $path_volume is done with status code $?| tee -a text.txt
-mkdir -p /$path_volume; echo Create a dir /$path_volume is done with status code $?| tee -a text.txt
-
-mount /dev/vlgrp1/lv /$path_volume; echo Mount volume is done with status code $?|| tee -a text.txt
+while true; do
+        echo -n "Enter a mountpoint for volume "| tee -a text.txt
+        read path_volume; echo Read a $path_volume is done with status code $?| tee -a text.txt
+        if [ -d /$path_volume ]
+                then
+                echo 'This folder is exists. You must to repeat.'
+                continue
+        else
+                mkdir -p /$path_volume; echo Create a dir /$path_volume is done with status code $?| tee -a text.txt
+                mount /dev/vlgrp1/lv /$path_volume; echo Mount volume is done with status code $?|| tee -a text.txt
+                break
+        fi
+done
 
 echo 'Task7 is done'| tee -a text.txt
 
@@ -95,13 +111,31 @@ systemctl enable nfs-server; echo Enable NFS-SERVER is done with status code $?|
 systemctl start rpc-statd; echo Start RPC-STATD is done with status code $?| tee -a text.txt
 systemctl start nfs-idmapd; echo NFS-IDMAPD is done with status code $?| tee -a text.txt
 
-echo -n "Enter a dir for nfs "| tee -a text.txt
-read path_nfs; echo Read is done with status code $?| tee -a text.txt
-mkdir -p /$path_nfs; echo Create a dir /$path_nfs is done with status code $?| tee -a text.txt
+while true; do
+        echo -n "Enter a dir for nfs "| tee -a text.txt
+        read path_nfs; echo Read is done with status code $?| tee -a text.txt
+        if [ -d /$path_nfs]
+                then
+                echo 'This folder is exists. You must to repeat.'
+                continue
+        else
+                mkdir -p /$path_nfs; echo Create a dir /$path_nfs is done with status code $?| tee -a text.txt
+                break
+        fi
+done
 
-echo -n "Enter a mountpoint for nfs "| tee -a text.txt
-read path_mpnfs; echo Read is done with status code $?| tee -a text.txt
-mkdir -p /$path_mpnfs; echo Create a dir /$path_mpnfs is done with status code $?| tee -a text.txt
+while true; do
+        echo -n "Enter a mountpoint for nfs "| tee -a text.txt
+        read path_mpnfs; echo Read is done with status code $?| tee -a text.txt
+        if [ -d /$path_mpnfs]
+                then
+                echo 'This folder is exists. You must to repeat.'
+                continue
+        else
+                mkdir -p /$path_mpnfs; echo Create a dir /$path_mpnfs is done with status code $?| tee -a text.txt
+                break
+        fi
+done
 
 chmod 777 /$path_nfs; echo Chmode is done with status code $?| tee -a text.txt
 
@@ -112,4 +146,3 @@ mount -t nfs 192.168.57.5:/$path_nfs /$path_mpnfs; echo Mount nfs is done with s
 
 
 echo 'Task8 is done'| tee -a text.txt
-
