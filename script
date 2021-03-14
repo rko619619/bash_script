@@ -1,14 +1,37 @@
 #!/bin/bash
-#echo'Task1 is going'
+
+start_fn(){
+        echo Task$2 is going | tee -a starting_task.log
+}
+
+finish_fn(){
+        echo Task$3 is done | tee -a starting_task.log
+}
+
+check_folder(){
+        while true; do
+                echo -n "Enter a folder for " $1 | tee -a folder.log
+                read path; echo Read is done with status code $? | tee -a folder.log
+                if [ -d /$path ]
+                        then
+                        echo 'This folder is exists. You must to repeat'
+                        continue
+                else
+                        mkdir /$path; echo Create a dir /$path is done with status code $?| tee -a folder.log
+                        break
+                fi
+        done
+}
+
+
+#start_fn 1
 
 #sed -i 's/ONBOOT=no/ONBOOT=yes/' /etc/sysconfig/network-scripts/ifcfg-enp0s3
 #service network restart
 
-#echo 'Task1 is done'
+#finish_fn 1
 
-
-
-echo 'Task2 is going '| tee -a text.txt
+start_fn 2
 
 for var in INPUT OUTPUT
 do
@@ -18,29 +41,16 @@ done
 sed -i 's/#PermitRootLogin yes/PermitRootlogin no/' /etc/ssh/sshd_config; echo Added a permit root login is done with status code $?| tee -a text.txt
 systemctl restart sshd; echo Restart sshd is done with status code $?| tee -a text.txt
 
-echo 'Task2 is done'| tee -a text.txt
+finish_fn 2
 
 
+start_fn 3
 
-echo 'Task3 is going'| tee -a text.txt
+check_folder ISO
 
-while true; do
-        echo -n "Enter a mountpoint for ISO "| tee -a text.txt
-        read path; echo Read is done with satatus code $?| tee -a text.txt
-        if [ -d /$path ]
-                then
-                echo 'This folder is exists. You must to repeat.'
-                continue
-        else
-                mkdir  /$path; echo Create a dir /$path is done with status code $?| tee -a text.txt
-	    mount /CentOS-7-x86_64-DVD-2009.iso /$path; echo Mount for ISO is done with status code $?| tee -a text.txt
-                break
-                
-        fi
-done
+mount /CentOS-7-x86_64-DVD-2009.iso /$path; echo Mount for ISO is done with status code $?| tee -a text.txt
 
 yum --desablerepo=\* version &> /dev/null; echo Disabled a repo is done with status code %?| tee -a text.txt
-
 
 echo  '[LocalRepo]' >  /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a text.txt
 echo  'name=LocalRepository' >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a text.txt
@@ -49,8 +59,10 @@ echo  'enabled=1' >> /etc/yum.repos.d/local.repo; echo Write data to local.repo 
 echo  'gpgcheck=0' >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a text.txt
 echo  'gpgkey=file::///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7' >>  /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a text.txt
 
-echo 'Task3 is done'| tee -a text.txt
-echo 'Task4 is going'| tee -a text.txt
+finish_fn 3
+
+
+start_fn 4
 
 echo 'Start state of disks' && lsblk| tee -a text.txt
 
@@ -58,59 +70,50 @@ yum install mdadm -y; echo Install mdadm is done with status code $?| tee -a tex
 
 read -p "Enter disk for raid: " first second third; echo Read a disks is done with status code $?| tee -a text.txt
 
-(echo n; echo p; echo 1; echo ; echo ; echo t; echo fd; echo w) | fdisk /dev/$first; echo Create a raid for $first is done with status code $?| tee -a text.txt
-(echo n; echo p; echo 1; echo ; echo ; echo t; echo fd; echo w) | fdisk /dev/$second; echo Create a raid for $second is done with status code $?| tee -a text.txt
-(echo n; echo p; echo 1; echo ; echo ; echo t; echo fd; echo w) | fdisk /dev/$third; echo Create a raid for $third is done with status code $?| tee -a text.txt
+for var in $first $second $third
+do
+        (echo n; echo p; echo 1; echo ; echo ; echo t; echo fd; echo w) | fdisk /dev/$var; echo Create a raid for $var is done with status code $?| tee -a text.txt
+done
 
-mdadm --create /dev/md5 --level=5 --raid-devices=3 /dev/sd[b-d]1; echo Create a raid for disks is done with status code $?| tee -a text.txt
+mdadm --create /dev/md5 --level=5 --raid-devices=3  /dev/sd[b-d]1; echo Create a raid for disks is done with status code $?| tee -a text.txt
 
 echo 'Finish state of discks' && lsblk| tee -a text.txt
 
-echo 'Task4 is done'| tee -a text.txt
+finish_fn 4
 
 
-echo 'Task5 is going'| tee -a text.txt
+start_fn 5
 
 pvcreate /dev/md5 && vgcreate vlgrp1 /dev/md5 && lvcreate -l +100%FREE -n lv  vlgrp1; echo Creating a LVM is done with status code $?| tee -a text.txt
 
-echo 'Task5 is done'| tee -a text.txt
+finish_fn 5
 
-
-echo 'Task6 is going'| tee -a text.txt
+start_fn 6
 
 mkfs -t xfs /dev/vlgrp1/lv; echo Creating a xfs is done with status code $?| tee -a text.txt
 
-echo 'Task6 is done'| tee -a text.txt
+finish_fn 6
 
 
-echo 'Task7 is going'| tee -a text.txt
+start_fn 7
 
-while true; do
-        echo -n "Enter a mountpoint for volume "| tee -a text.txt
-        read path_volume; echo Read a $path_volume is done with status code $?| tee -a text.txt
-        if [ -d /$path_volume ]
-                then
-                echo 'This folder is exists. You must to repeat.'
-                continue
-        else
-                mkdir -p /$path_volume; echo Create a dir /$path_volume is done with status code $?| tee -a text.txt
-                mount /dev/vlgrp1/lv /$path_volume; echo Mount volume is done with status code $?|| tee -a text.txt
-                break
-        fi
-done
+check_folder Volume
 
-echo 'Task7 is done'| tee -a text.txt
+mount /dev/vlgrp1/lv /$path_volume; echo Mount volume is done with status code $?|| tee -a text.txt
+
+finish_fn 7
 
 
-echo 'Task8 is going'| tee -a text.txt
-yum install nfs-utils; echo Install a nfs-utils is done with status code $?| tee -a text.txt
+start_fn 8
 
-systemctl start rpcbind; echo Start RPCBIND is done with status code $?| tee -a text.txt
-systemctl enable rpcbind; echo Enable RPCBIND is done with status code $?| tee -a text.txt
-systemctl start nfs-server; echo Start NFS_SERVER is done with status code $?| tee -a text.txt
-systemctl enable nfs-server; echo Enable NFS-SERVER is done with status code $?| tee -a text.txt
-systemctl start rpc-statd; echo Start RPC-STATD is done with status code $?| tee -a text.txt
-systemctl start nfs-idmapd; echo NFS-IDMAPD is done with status code $?| tee -a text.txt
+(echo y) | yum install nfs-utils; echo Install a nfs-utils is done with status code $?| tee -a text.txt
+
+system_function start rpcbind
+system_function enable rpcbind
+system_function start nfs-server
+system_function enable nfs-server
+system_function start rpc-statd
+system_function start nfs-idmapd
 
 while true; do
         echo -n "Enter a dir for nfs "| tee -a text.txt
@@ -144,5 +147,4 @@ exportfs -r; echo Exportfs is done with status code $?| tee -a text.txt
 
 mount -t nfs 192.168.57.5:/$path_nfs /$path_mpnfs; echo Mount nfs is done with status code $?| tee -a text.txt
 
-
-echo 'Task8 is done'| tee -a text.txt
+finish_fn 8
