@@ -45,7 +45,6 @@ echo 'Task4 is going'
 
 echo 'Start state of disks' && lsblk
 
-
 echo 'Task4 is done'
 
 
@@ -90,6 +89,7 @@ mkdir -p /$path_nfs
 
 echo -n "Enter a mountpoint for nfs "
 read path_mpnfs
+mkdir -p /$path_mpnfs
 
 chmod 777 /$path_nfs
 
@@ -97,5 +97,5 @@ echo /$path_nfs' *(rw,sync,no_root_squash)' >> /etc/exports
 exportfs -r
 
 mount -t nfs 192.168.57.5:/$path_nfs /$path_mpnfs; echo Mount nfs is done with status code $?
-echo 'Task8 is done'
 
+echo 'Task8 is done'
