@@ -1,11 +1,11 @@
 #!/bin/bash
 
 start_fn(){
-        echo Task$2 is going | tee -a starting_task.log
+        echo Task $1 is going | tee -a starting_task.log
 }
 
 finish_fn(){
-        echo Task$3 is done | tee -a starting_task.log
+        echo Task $1 is done | tee -a starting_task.log
 }
 
 check_folder(){
@@ -35,11 +35,11 @@ start_fn 2
 
 for var in INPUT OUTPUT
 do
-iptables -A $var -p tcp --dport 22 -j ACCEPT; echo Command for added iptables $var is done with status code $?| tee -a text.txt
+iptables -A $var -p tcp --dport 22 -j ACCEPT; echo Command for added iptables $var is done with status code $?| tee -a networl.log
 done
 
-sed -i 's/#PermitRootLogin yes/PermitRootlogin no/' /etc/ssh/sshd_config; echo Added a permit root login is done with status code $?| tee -a text.txt
-systemctl restart sshd; echo Restart sshd is done with status code $?| tee -a text.txt
+sed -i 's/#PermitRootLogin yes/PermitRootlogin no/' /etc/ssh/sshd_config; echo Added a permit root login is done with status code $?| tee -a network.log
+systemctl restart sshd; echo Restart sshd is done with status code $?| tee -a systemctl.lo
 
 finish_fn 2
 
@@ -48,49 +48,48 @@ start_fn 3
 
 check_folder ISO
 
-mount /CentOS-7-x86_64-DVD-2009.iso /$path; echo Mount for ISO is done with status code $?| tee -a text.txt
+mount /CentOS-7-x86_64-DVD-2009.iso /$path; echo Mount for ISO is done with status code $?| tee -a mount.log
 
-yum --desablerepo=\* version &> /dev/null; echo Disabled a repo is done with status code %?| tee -a text.txt
+yum --desablerepo=\* version &> /dev/null; echo Disabled a repo is done with status code %?| tee -a mount.log
 
-echo  '[LocalRepo]' >  /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a text.txt
-echo  'name=LocalRepository' >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a text.txt
-echo  'baseurl=file:///'$path >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a text.txt
-echo  'enabled=1' >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a text.txt
-echo  'gpgcheck=0' >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a text.txt
-echo  'gpgkey=file::///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7' >>  /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a text.txt
+echo  '[LocalRepo]' >  /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a data.log
+echo  'name=LocalRepository' >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a data.log
+echo  'baseurl=file:///'$path >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a data.log
+echo  'enabled=1' >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a data.log
+echo  'gpgcheck=0' >> /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a data.log
+echo  'gpgkey=file::///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7' >>  /etc/yum.repos.d/local.repo; echo Write data to local.repo is done with status code $?| tee -a data.log
 
 finish_fn 3
 
-
 start_fn 4
 
-echo 'Start state of disks' && lsblk| tee -a text.txt
+echo 'Start state of disks' && lsblk| tee -a raid.log
 
-yum install mdadm -y; echo Install mdadm is done with status code $?| tee -a text.txt
+yum install mdadm -y; echo Install mdadm is done with status code $?| tee -a raid.log
 
-read -p "Enter disk for raid: " first second third; echo Read a disks is done with status code $?| tee -a text.txt
+read -p "Enter disk for raid: " first second third; echo Read a disks is done with status code $?| tee -a raid.log
 
 for var in $first $second $third
 do
-        (echo n; echo p; echo 1; echo ; echo ; echo t; echo fd; echo w) | fdisk /dev/$var; echo Create a raid for $var is done with status code $?| tee -a text.txt
+        (echo n; echo p; echo 1; echo ; echo ; echo t; echo fd; echo w) | fdisk /dev/$var; echo Create a raid for $var is done with status code $?| tee -a raid.log
 done
 
-mdadm --create /dev/md5 --level=5 --raid-devices=3  /dev/sd[b-d]1; echo Create a raid for disks is done with status code $?| tee -a text.txt
+mdadm --create /dev/md5 --level=5 --raid-devices=3  /dev/sd[b-d]1; echo Create a raid for disks is done with status code $?| tee -a raid.log
 
-echo 'Finish state of discks' && lsblk| tee -a text.txt
+echo 'Finish state of discks' && lsblk| tee -a raid.log
 
 finish_fn 4
 
 
 start_fn 5
 
-pvcreate /dev/md5 && vgcreate vlgrp1 /dev/md5 && lvcreate -l +100%FREE -n lv  vlgrp1; echo Creating a LVM is done with status code $?| tee -a text.txt
+pvcreate /dev/md5 && vgcreate vlgrp1 /dev/md5 && lvcreate -l +100%FREE -n lv  vlgrp1; echo Creating a LVM is done with status code $?| tee -a lvm.log
 
 finish_fn 5
 
 start_fn 6
 
-mkfs -t xfs /dev/vlgrp1/lv; echo Creating a xfs is done with status code $?| tee -a text.txt
+mkfs -t xfs /dev/vlgrp1/lv; echo Creating a xfs is done with status code $?| tee -a lvm.log
 
 finish_fn 6
 
@@ -99,52 +98,52 @@ start_fn 7
 
 check_folder Volume
 
-mount /dev/vlgrp1/lv /$path_volume; echo Mount volume is done with status code $?|| tee -a text.txt
+mount /dev/vlgrp1/lv /$path_volume; echo Mount volume is done with status code $?|| tee -a lvm.log
 
 finish_fn 7
 
 
 start_fn 8
 
-(echo y) | yum install nfs-utils; echo Install a nfs-utils is done with status code $?| tee -a text.txt
+(echo y) | yum install nfs-utils; echo Install a nfs-utils is done with status code $?| tee -a systemctl.log
 
-system_function start rpcbind
-system_function enable rpcbind
-system_function start nfs-server
-system_function enable nfs-server
-system_function start rpc-statd
-system_function start nfs-idmapd
+systemctl start rpcbind; echo Start RPCBIND is done with status code $?| tee -a systemctl.log
+systemctl enable rpcbind; echo Enable RPCBIND is done with status code $?| tee -a systemctl.log
+systemctl start nfs-server; echo Start NFS_SERVER is done with status code $?| tee -a systemctl.log
+systemctl enable nfs-server; echo Enable NFS-SERVER is done with status code $?| tee -a systemctl.log
+systemctl start rpc-statd; echo Start RPC-STATD is done with status code $?| tee -a systemctl.log
+systemctl start nfs-idmapd; echo NFS-IDMAPD is done with status code $?| tee -a systemctl.log
 
 while true; do
-        echo -n "Enter a dir for nfs "| tee -a text.txt
-        read path_nfs; echo Read is done with status code $?| tee -a text.txt
+        echo -n "Enter a dir for nfs "| tee -a folder.log
+        read path_nfs; echo Read is done with status code $?| tee -a folder.log
         if [ -d /$path_nfs ]
                 then
                 echo 'This folder is exists. You must to repeat.'
                 continue
         else
-                mkdir -p /$path_nfs; echo Create a dir /$path_nfs is done with status code $?| tee -a text.txt
+                mkdir -p /$path_nfs; echo Create a dir /$path_nfs is done with status code $?| tee -a folder.log
                 break
         fi
 done
 
 while true; do
-        echo -n "Enter a mountpoint for nfs "| tee -a text.txt
-        read path_mpnfs; echo Read is done with status code $?| tee -a text.txt
+        echo -n "Enter a mountpoint for nfs "| tee -a folder.log
+        read path_mpnfs; echo Read is done with status code $?| tee -a folder.log
         if [ -d /$path_mpnfs ]
                 then
                 echo 'This folder is exists. You must to repeat.'
                 continue
         else
-                mkdir -p /$path_mpnfs; echo Create a dir /$path_mpnfs is done with status code $?| tee -a text.txt
+                mkdir -p /$path_mpnfs; echo Create a dir /$path_mpnfs is done with status code $?| tee -a folder.log
                 break
         fi
 done
 
-chmod 777 /$path_nfs; echo Chmode is done with status code $?| tee -a text.txt
-echo /$path_nfs' *(rw,sync,no_root_squash)' >> /etc/exports;echo Write a data is done with status code $?| tee -a text.txt
-exportfs -r; echo Exportfs is done with status code $?| tee -a text.txt
+chmod 777 /$path_nfs; echo Chmode is done with status code $?| tee -a nfs.log
+echo /$path_nfs' *(rw,sync,no_root_squash)' >> /etc/exports;echo Write a data is done with status code $?| tee -a nfs.log
+exportfs -r; echo Exportfs is done with status code $?| tee -a nfs.log
 
-mount -t nfs 192.168.57.5:/$path_nfs /$path_mpnfs; echo Mount nfs is done with status code $?| tee -a text.txt
+mount -t nfs 192.168.57.5:/$path_nfs /$path_mpnfs; echo Mount nfs is done with status code $?| tee -a nfs.log
 
 finish_fn 8
